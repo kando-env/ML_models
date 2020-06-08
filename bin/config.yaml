@@ -1,0 +1,18 @@
+custom:
+  secrets: ${file(secrets.yml)
+name: CI_CD
+modelType: Custom
+clusterId: cljuxqmct
+projectId: prfuvnyks
+container: kandoenv/training:latest
+workspaceUrl: https://github.com/kando-env/flask_api.git
+registryUrl: https://docker.io/
+registryUsername: kandoenv
+registryPassword: kando12345
+machineType: c5.xlarge
+modelPath: /artifacts
+experimentEnv:
+  KEY: 559a08072a2c81fab76365201af9cb18316e059a53d5e6f662cbd1410e78b09d
+  SECRET: f653bc50d758e670fbd0d12ad8daa416caa28ffe722031f56bd2b31208646dab
+  API_KEY: 1c049baab476c07a9b8e384ec89020
+command: python api/training/training_experiment.py name xgboost_cod point_id 1012 start 1554182371 end 1582008447
