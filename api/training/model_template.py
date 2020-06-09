@@ -10,8 +10,7 @@ load_dotenv()
 
 class ModelTemplate:
     def __init__(self):
-        base_url = "https://kando.herokuapp.com"
-        self.client = kando_client.client(base_url, os.getenv('KEY'), os.getenv('SECRET'))
+        self.client = kando_client.client(os.getenv('KANDO_URL'), os.getenv('KEY'), os.getenv('SECRET'))
 
     def train(self, **kwargs):
         print('training...')

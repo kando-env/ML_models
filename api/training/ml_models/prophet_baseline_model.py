@@ -38,7 +38,8 @@ class ProphetBaselineTemplate(ModelTemplate, ABC):
                 pred = self.do_predict({**kwargs, **pred_params})
                 if 'callback' not in kwargs:
                     kwargs['callback'] = self.client.generate_callback()
-                self.client.notify_model_training_status(pred, kwargs['callback'])
+                response = ' '.join([str(node), sensor, pred])
+                self.client.notify_model_training_status(response, kwargs['callback'])
 
     def get_metadata(self):
         df_cv = cross_validation(self.model, initial='7 days', period='7 days', horizon='12 hours')
