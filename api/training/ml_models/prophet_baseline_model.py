@@ -25,20 +25,23 @@ class ProphetBaselineTemplate(ModelTemplate, ABC):
         self.model = None
 
     def do_train(self, **kwargs):
-        for node in kwargs['nodes']:
-            for sensor in ['EC', 'PH', 'TEMPERATURE']:
+        for node_params in kwargs['nodes']:
+            node, sensors = node_params['node'], node_params['sensors']
+            for sensor in sensors:
                 data = self.process_data(node, sensor)
                 self.model = Prophet(yearly_seasonality=False, weekly_seasonality=True, daily_seasonality=True)
                 if kwargs['country'] is not None:
                     self.model.add_country_holidays(country_name=kwargs['country'])
                 self.model.fit(data)
                 print('finished fitting model')
+                perf = performance_metrics(cross_validation(self.model, initial='7 days', period='7 days', horizon='12 hours'))
+                mean_mape = perf['mape'].mean()
                 pred_params = {'baseline_hours': kwargs.get('baseline_hours', 24 * 7), 'baseline_only': kwargs.get(
                     'baseline_only', True), 'from_cache': False}
                 pred = self.do_predict({**kwargs, **pred_params})
                 if 'callback' not in kwargs:
                     kwargs['callback'] = self.client.generate_callback()
-                response = ' '.join([str(node), sensor, pred])
+                response = ' '.join(['accuracy', str(mean_mape), str(node), sensor, pred])
                 self.client.notify_model_training_status(response, kwargs['callback'])
 
     def get_metadata(self):
