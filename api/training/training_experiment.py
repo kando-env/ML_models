@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import pickle
 import sys
 from importlib import import_module
@@ -19,6 +20,8 @@ def save_model(model, path):
 
 def train(params):
     model = params.pop("name")
+    camel_to_snake = lambda x: re.sub(r'(?<!^)(?=[A-Z])', '_', x).lower()
+    model = camel_to_snake(model)  # handle camel case
     model_module = "ml_models." + model + '_model'
     model_class = model.title().replace('_', '') + 'Template'
     model_module = import_module(model_module)
@@ -34,7 +37,6 @@ def train(params):
     model_path = export_dir + '/' + model_name + '.pkl'
     save_model(m, model_path)
     m.save_metadata()
-    return
 
 
 if __name__ == '__main__':
