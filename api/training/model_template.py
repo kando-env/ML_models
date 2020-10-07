@@ -11,6 +11,7 @@ load_dotenv()
 class ModelTemplate:
     def __init__(self):
         self.client = kando_client.client(os.getenv('KANDO_URL'), os.getenv('KEY'), os.getenv('SECRET'))
+        self.experiment_aborted = False  # if the model encounters an error (eg no data) during training, abort early
 
     def train(self, **kwargs):
         print('training...')

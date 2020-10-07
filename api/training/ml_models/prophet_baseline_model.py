@@ -31,6 +31,7 @@ class ProphetBaselineTemplate(ModelTemplate, ABC):
                 data = self.process_data(node, sensor)
                 if data['y'].isna().sum() / len(data) > 0.9:
                     response = f'More than 90-% missing data for sensor {sensor} at node {node}, no prediction'
+                    self.experiment_aborted = True
                 else:
                     self.model = Prophet(yearly_seasonality=False,
                                          weekly_seasonality=True,
