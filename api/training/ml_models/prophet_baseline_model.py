@@ -41,17 +41,18 @@ class ProphetBaselineTemplate(ModelTemplate, ABC):
                             country_name=kwargs['country'])
                     self.model.fit(data)
                     print('finished fitting model')
-                    metadata = performance_metrics(
-                        cross_validation(self.model,
-                                         initial='7 days',
-                                         period='7 days',
-                                         horizon='12 hours'))
-                    accuracy = 0
-                    for metric in ['mape', 'rmse', 'mae']:
-                        if metric in metadata:
-                            print(f'returning {metric}')
-                            accuracy = metadata[metric].mean()
-                            break
+
+                    # metadata = performance_metrics(
+                    #     cross_validation(self.model,
+                    #                      initial='7 days',
+                    #                      period='7 days',
+                    #                      horizon='12 hours'))
+                    # for metric in ['mape', 'rmse', 'mae']:
+                    #     if metric in metadata:
+                    #         print(f'returning {metric}')
+                    #         accuracy = metadata[metric].mean()
+                    #         break
+
                     pred_params = {
                         'baseline_hours': kwargs.get('baseline_hours', 24 * 7),
                         'baseline_only': kwargs.get('baseline_only', True),
@@ -63,7 +64,7 @@ class ProphetBaselineTemplate(ModelTemplate, ABC):
                     response = json.dumps({
                         'node': node,
                         'sensor': sensor,
-                        'accuracy': accuracy,
+                        # 'accuracy': accuracy,
                         'response': pred
                     })
                 self.client.notify_model_training_status(
@@ -95,11 +96,12 @@ class ProphetBaselineTemplate(ModelTemplate, ABC):
             'yhat_upper': 'H1',
             'yhat_lower': 'L1'
         }).copy()
-        forecast['H2'], forecast['H3'] = const_2 * \
-            forecast['H1'], const_3 * forecast['H1']
-        forecast['L2'], forecast['L3'] = const_2 * \
-            forecast['L1'], const_3 * forecast['L1']
-        return forecast[['yhat', 'H1', 'H2', 'H3', 'L1', 'L2', 'L3']].to_json()
+        # forecast['H2'], forecast['H3'] = const_2 * \
+            # forecast['H1'], const_3 * forecast['H1']
+        # forecast['L2'], forecast['L3'] = const_2 * \
+            # forecast['L1'], const_3 * forecast['L1']
+        # return forecast[['yhat', 'H1', 'H2', 'H3', 'L1', 'L2', 'L3']].to_json()
+        return forecast[['yhat', 'H1', 'L1']].to_json()
 
     def process_data(self, point_id, prediction_param):
         start, end = get_start_and_end_time()
