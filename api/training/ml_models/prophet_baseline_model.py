@@ -7,7 +7,6 @@ from fbprophet import Prophet
 from fbprophet.diagnostics import cross_validation, performance_metrics
 from model_template import ModelTemplate
 
-
 def get_start_and_end_time():
     end = datetime.combine(date.today(), time.min)
     start = end - timedelta(weeks=16)
