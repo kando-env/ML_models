@@ -7,6 +7,8 @@ RUN pip install fbprophet
 RUN pip install xgboost
 # multi step build - add local shh key and securely pip install private repo. the private key isn't stored in the build
 # https://stackoverflow.com/a/62258239/6220759
-RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
-RUN --mount=type=ssh pip install git+ssh://git@github.com/nadavk72/kando-python-client.git
+# RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+# RUN --mount=type=ssh pip install git+ssh://git@github.com/nadavk72/kando-python-client.git
+RUN pip install git+https://7ccffead3063519ac2d3c5fc9c46ef4ba7691143@github.com/nadavk72/kando-python-client.git
 CMD ["sh"]
+CMD ["echo "]

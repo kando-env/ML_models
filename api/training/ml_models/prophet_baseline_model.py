@@ -46,6 +46,7 @@ class ProphetBaselineTemplate(ModelTemplate, ABC):
                                          initial='7 days',
                                          period='7 days',
                                          horizon='12 hours'))
+                    accuracy = 0
                     for metric in ['mape', 'rmse', 'mae']:
                         if metric in metadata:
                             print(f'returning {metric}')
