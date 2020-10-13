@@ -41,16 +41,16 @@ class ProphetBaselineTemplate(ModelTemplate, ABC):
                             country_name=kwargs['country'])
                     self.model.fit(data)
                     print('finished fitting model')
-                    metadata = performance_metrics(
-                        cross_validation(self.model,
-                                         initial='7 days',
-                                         period='7 days',
-                                         horizon='12 hours'))
-                    for metric in ['mape', 'rmse', 'mae']:
-                        if metric in metadata:
-                            print(f'returning {metric}')
-                            accuracy = metadata[metric].mean()
-                            break
+                    # metadata = performance_metrics(
+                    #     cross_validation(self.model,
+                    #                      initial='7 days',
+                    #                      period='7 days',
+                    #                      horizon='12 hours'))
+                    # for metric in ['mape', 'rmse', 'mae']:
+                    #     if metric in metadata:
+                    #         print(f'returning {metric}')
+                    #         accuracy = metadata[metric].mean()
+                    #         break
                     pred_params = {
                         'baseline_hours': kwargs.get('baseline_hours', 24 * 7),
                         'baseline_only': kwargs.get('baseline_only', True),
