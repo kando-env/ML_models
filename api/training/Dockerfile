@@ -9,6 +9,6 @@ RUN pip install xgboost
 # https://stackoverflow.com/a/62258239/6220759
 # RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 # RUN --mount=type=ssh pip install git+ssh://git@github.com/nadavk72/kando-python-client.git
-RUN pip install git+https://7ccffead3063519ac2d3c5fc9c46ef4ba7691143@github.com/nadavk72/kando-python-client.git
+RUN pip install git+https://f0e06b4b4e20f0d9209cd7f4b3e0473d26ecba59@github.com/nadavk72/kando-python-client.git@staging
 CMD ["sh"]
 CMD ["echo "]
