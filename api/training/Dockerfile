@@ -1,6 +1,7 @@
 # syntax = docker/dockerfile:1.0-experimental
 FROM python:3.7
 COPY requirements.txt /tmp/
+ARG github_token=""
 RUN pip install --upgrade pip
 RUN pip install --requirement /tmp/requirements.txt
 RUN pip install fbprophet
