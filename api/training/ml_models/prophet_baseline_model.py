@@ -102,7 +102,8 @@ class ProphetBaselineTemplate(ModelTemplate, ABC):
                                                   include_history=False)
         forecast = self.model.predict(future)
         forecast = forecast.set_index("ds")
-        forecast.index = forecast.index.astype(str)  # for date serialisation
+        forecast.index = (forecast.index.astype(int) // 10**6).astype(
+            str)  # for date serialisation
         print("finished prediction")
         # if context['baseline_only']:
         #     return forecast[['yhat']].to_dict()
