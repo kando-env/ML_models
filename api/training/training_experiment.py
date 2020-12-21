@@ -5,12 +5,6 @@ import re
 import sys
 from importlib import import_module
 
-from dotenv import load_dotenv
-from gradient import sdk_client
-
-load_dotenv()
-gradient_client = sdk_client.SdkClient(os.getenv("APIKEY"))
-
 
 def save_model(model, path):
     with open(path, "wb+") as f:
@@ -24,7 +18,7 @@ def train(params):
     camel_to_snake = lambda x: re.sub(r"(?<!^)(?=[A-Z])", "_", x).lower()
     model = camel_to_snake(model)  # handle camel case
     model_module = "ml_models." + model + "_model"
-    model_class = model.title().replace("_", "") + "Template"
+    model_class = model.title().replace("_", "")
     model_module = import_module(model_module)
     my_model = getattr(model_module, model_class)
     m = my_model()

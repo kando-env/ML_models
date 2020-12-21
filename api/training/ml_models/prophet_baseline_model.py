@@ -1,11 +1,12 @@
 import json
-from abc import ABC
 from datetime import date, datetime, time, timedelta
 
 import pandas as pd
 from fbprophet import Prophet
 from fbprophet.diagnostics import cross_validation, performance_metrics
 from model_template import ModelTemplate
+# linters/IDEs will mark this import as invalid. can safely ignore it - the path is
+# relative to where the code runs from (training_experiment), and this module is never run as main
 
 def get_start_and_end_time():
     end = datetime.combine(date.today(), time.min)
@@ -13,7 +14,7 @@ def get_start_and_end_time():
     return start.timestamp(), end.timestamp()
 
 
-class ProphetBaselineTemplate(ModelTemplate, ABC):
+class ProphetBaseline(ModelTemplate):
     def __init__(self):
         """
         ProphetBaseline is an exceptional class. Its train() method also calls predict(), and caches the pred
