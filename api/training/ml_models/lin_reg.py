@@ -1,12 +1,10 @@
-from abc import ABC
-
 import numpy as np
 from sklearn.linear_model import LinearRegression
 
 from model_template import ModelTemplate
 
 
-class LinRegTemplate(ModelTemplate, ABC):
+class LinReg(ModelTemplate):
     def __init__(self):
         self.client = None  # instead of super().__init__() - since we don't need a client
         self.model = LinearRegression()
