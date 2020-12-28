@@ -36,6 +36,7 @@ def train(params):
     model_path = export_dir + "/" + model_name + ".pkl"
     save_model(m, model_path)
     # m.save_metadata()
+    m.predict(None)
 
 
 if __name__ == "__main__":
