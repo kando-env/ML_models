@@ -19,6 +19,7 @@ holidays==0.10.1
 idna==2.9
 Jinja2==2.11.1
 kiwisolver==1.1.0
+lightgbm==2.3.0
 log-symbols==0.0.14
 LunarCalendar==0.0.9
 MarkupSafe==1.1.1
@@ -27,6 +28,7 @@ matplotlib==3.2.0
 numpy==1.18.1
 oauthlib==3.1.0
 pandas==1.0.2
+pickle5==0.0.11
 progressbar2==3.50.0
 prompt-toolkit==2.0.10
 pycparser==2.20
