@@ -26,6 +26,9 @@ class XgboostCod(ModelTemplate):
         import os
         print(os.environ)
         print("finished fitting model")
+        # when deployment server unpickles a model, it needs to have that class exist
+        # in its namespace. That means you need to rebuild the Docker inference image
+        # in addition to adding the model in the remote Git repo
         self.foo = self.xgbr.predict(self.X_test).tolist()
 
     def get_metadata(self):
