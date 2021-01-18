@@ -1,3 +1,5 @@
 flask==1.1.1
 pickle-mixin
 requests
+lightgbm
+pickle5
