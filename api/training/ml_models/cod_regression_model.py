@@ -6,11 +6,12 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 import pickle5 as pickle
-from kando_data.model_runner.local import ModelTemplate as Model
+from model_template import ModelTemplate
+
 from scipy import interpolate
 
 
-class CodRegressorUsingBh(Model):
+class CodRegressorUsingBh(ModelTemplate):
     def __init__(self):
         super().__init__()
         self.model = self._load_obj('cod_model')
@@ -435,21 +436,3 @@ def get_start_and_end_time():
     start = end - timedelta(weeks=16)
     return start.timestamp(), end.timestamp()
 
-
-def main():
-    from os.path import join, dirname
-    from dotenv import load_dotenv
-    dotenv_path = join(dirname(__file__), '.env')
-    load_dotenv()
-    print(dotenv_path)
-    my_model = CodRegressorUsingBh()
-    # my_model.train()
-    site = 'begin'
-    start = datetime(2021, 1, 7, 0, 0).timestamp()
-    end = ''
-    pred = my_model.predict_({"site": site, "start": start, "end": end})
-    print(pred)
-
-
-if __name__ == "__main__":
-    main()
