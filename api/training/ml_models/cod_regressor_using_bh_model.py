@@ -6,8 +6,9 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 import pickle5 as pickle
+import sys
+sys.path.insert(0,'..')
 from model_template import ModelTemplate
-
 from scipy import interpolate
 
 
@@ -106,7 +107,7 @@ class CodRegressorUsingBh(ModelTemplate):
         """
         saves and obj to model_params folder
         """
-        with open('model_params/' + name + '.pkl', 'wb') as f:
+        with open('ml_models/model_params/' + name + '.pkl', 'wb') as f:
             pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
@@ -114,7 +115,7 @@ class CodRegressorUsingBh(ModelTemplate):
         """
         loads an obj to model_params folder
         """
-        with open('model_params/' + name + '.pkl', 'rb') as f:
+        with open('ml_models/model_params/' + name + '.pkl', 'rb') as f:
             return pickle.load(f)
 
     def _create_training_df(self):
@@ -218,7 +219,7 @@ class CodRegressorUsingBh(ModelTemplate):
         """
         gets bh, cod and wl metadata and extracts basic features to be used for training or validation
         """
-        with open('model_params/dict_bh_info.json', 'r') as fp:
+        with open('ml_models/model_params/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
         if test_start is None:
@@ -341,7 +342,7 @@ class CodRegressorUsingBh(ModelTemplate):
         """
         df_sliced = df.copy()
         df_excluded = pd.DataFrame()
-        with open('model_params/dict_bh_info.json', 'r') as fp:
+        with open('ml_models/model_params/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
         for time_str in dict_bh_info[site]['corrupt_data_ind']:
@@ -376,7 +377,7 @@ class CodRegressorUsingBh(ModelTemplate):
 
         """
         scaling_df = self._load_obj('scaling_df')
-        with open('model_params/dict_bh_info.json', 'r') as fp:
+        with open('ml_models/model_params/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
         if site == 'atarot':
