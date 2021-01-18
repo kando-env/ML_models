@@ -23,8 +23,6 @@ class XgboostCod(ModelTemplate):
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             x, y, test_size=0.15)
         _ = self.xgbr.fit(self.X_train, self.y_train)
-        import os
-        print(os.environ)
         print("finished fitting model")
         # when deployment server unpickles a model, it needs to have that class exist
         # in its namespace. That means you need to rebuild the Docker inference image
@@ -50,7 +48,6 @@ class XgboostCod(ModelTemplate):
 
     def do_predict(self, context):
         # list to convert to json
-        return self.foo
         return self.xgbr.predict(self.X_test).tolist()
 
     def _process_data(self, **kwargs):
