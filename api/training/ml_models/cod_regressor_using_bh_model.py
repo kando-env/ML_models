@@ -1,6 +1,7 @@
 import json
 import time
 from datetime import date, datetime, time, timedelta, timezone
+from kando_data.model_runner.cloud import CloudEnv
 
 import lightgbm as lgb
 import numpy as np
@@ -9,10 +10,13 @@ import pickle5 as pickle
 import sys
 
 sys.path.insert(0, '..')
+# from kando_data.model_runner.local import ModelTemplate
 from model_template import ModelTemplate
 from scipy import interpolate
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
 
 class CodRegressorUsingBh(ModelTemplate):
     def __init__(self):
@@ -456,3 +460,24 @@ def get_start_and_end_time():
     end = datetime.combine(date.today(), time.min)
     start = end - timedelta(weeks=16)
     return start.timestamp(), end.timestamp()
+
+def main():
+    # dotenv_path = join(dirname(__file__), '.env')
+    load_dotenv()
+    c_env = CloudEnv()
+    #
+    MODEL_NAME = "cod_regressor_using_bh"
+    #
+    # c_env.train_model(MODEL_NAME, params={}, machine_type="c5.4xlarge")
+    #
+    # c_env.deploy_model("mosra3h0k3knhd9")
+
+    site = 'begin'
+    start = datetime(2021, 1, 7, 0, 0).timestamp()
+    end = ''
+    y_pred = c_env.request_prediction(deployment_id='debuo03nv2z3zz',
+                                      context={"model": MODEL_NAME, "site": site, "start": start, "end": end})
+    print(y_pred)
+
+if __name__ == "__main__":
+    main()
