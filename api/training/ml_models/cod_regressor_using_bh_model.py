@@ -9,7 +9,7 @@ import pickle5 as pickle
 import sys
 
 sys.path.insert(0, '..')
-from kando_data.model_runner.local import ModelTemplate
+from model_template import ModelTemplate
 from scipy import interpolate
 import os
 
