@@ -7,17 +7,22 @@ import numpy as np
 import pandas as pd
 import pickle5 as pickle
 import sys
-sys.path.insert(0,'..')
-from model_template import ModelTemplate
+
+sys.path.insert(0, '..')
+from kando_data.model_runner.local import ModelTemplate
 from scipy import interpolate
 import os
+
 
 class CodRegressorUsingBh(ModelTemplate):
     def __init__(self):
         super().__init__()
+        self.model_params_path = '/api/training/ml_models/model_params'
         self.model = self._load_obj('cod_model')
         self.pred = None
-        self.sites_list = ('sorek', 'sorek_new', 'beitGalla_dom', 'beitGalla', 'refaim_oil', 'refaim_150', 'begin','atarot','vetrinari')
+        self.sites_list = (
+            'sorek', 'sorek_new', 'beitGalla_dom', 'beitGalla', 'refaim_oil', 'refaim_150', 'begin', 'atarot',
+            'vetrinari')
 
         self.target = 'COD'
         self.num_samples_week = 4 * 24 * 7
@@ -28,6 +33,7 @@ class CodRegressorUsingBh(ModelTemplate):
         trains the model on entire dataset from sites listed in sites_list, not including last 2 weeks (or 0.2% of data)
         :param kwargs: no inputs currently required
         """
+        self.model_params_path = '/api/training/ml_models/model_params'
         x_train_all, y_train_all, x_eval_all, y_eval_all, x_test_all, y_test_all = self._create_training_df()
         training_features = self._load_obj(self.filename_model_chosen_features)
         lightgbm_params = {'n_estimators': 17320, 'max_depth': 9, 'colsample_bytree': 0.777, 'learning_rate': 0.007,
@@ -48,19 +54,19 @@ class CodRegressorUsingBh(ModelTemplate):
         site should currently be one of the options in sites_list
         :return: json with prediction outputs
         """
-
+        self.model_params_path = '/training/ml_models/model_params'
         df = self._get_site_df(kwargs['site'], test_start=kwargs['start'], test_end=kwargs['end'])
         df, base_features = self._extract_rolling_features(df)
         if self.target in df:
             x_test = df.drop(columns=[self.target], axis=1)
         else:
             x_test = df.copy()
-        x_test= self._transform_dataframe(x_test, base_features)
+        x_test = self._transform_dataframe(x_test, base_features)
         training_features = self._load_obj(self.filename_model_chosen_features)
 
         x_test = x_test[training_features]
         prediction = self.model.predict(x_test)
-        prediction=pd.DataFrame({self.target:prediction},index=x_test.index)
+        prediction = pd.DataFrame({self.target: prediction}, index=x_test.index)
         return prediction.to_json()
 
     # @staticmethod
@@ -102,20 +108,18 @@ class CodRegressorUsingBh(ModelTemplate):
                     window=window_size, min_periods=1).min()
         return df, base_features
 
-    @staticmethod
-    def _save_obj(obj, name):
+    def _save_obj(self,obj, name):
         """
         saves and obj to model_params folder
         """
-        with open(os.getcwd() +'/api/training/ml_models/model_params/' + name + '.pkl', 'wb') as f:
+        with open(os.getcwd() + self.model_params_path + '/' + name + '.pkl', 'wb') as f:
             pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
-    @staticmethod
-    def _load_obj(name):
+    def _load_obj(self,name):
         """
         loads an obj to model_params folder
         """
-        with open(os.getcwd() +'/api/training/ml_models/model_params/' + name + '.pkl', 'rb') as f:
+        with open(os.getcwd() + self.model_params_path + '/' + name + '.pkl', 'rb') as f:
             return pickle.load(f)
 
     def _create_training_df(self):
@@ -219,15 +223,19 @@ class CodRegressorUsingBh(ModelTemplate):
         """
         gets bh, cod and wl metadata and extracts basic features to be used for training or validation
         """
-        with open(os.getcwd() +'/api/training/ml_models/model_params/dict_bh_info.json', 'r') as fp:
+        with open(os.getcwd() + self.model_params_path + '/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
         if test_start is None:
+            # this means we are predicting
             start = dict_bh_info[site]['start']
             end = dict_bh_info[site]['end']
         else:
+            # this means we are training
             start = test_start
             end = test_end
+
+
 
         print(f'creating df for site {site}')
         bh_data = self.client.get_all(point_id=dict_bh_info[site]['bh_pointid'], unit_id='', start=start, end=end,
@@ -335,14 +343,13 @@ class CodRegressorUsingBh(ModelTemplate):
         df = df.resample('15T').nearest()
         return df
 
-    @staticmethod
-    def _remove_corrupt_data(df, site):
+    def _remove_corrupt_data(self,df, site):
         """
         removes corrupted data as specified in dict_bh_info per each site
         """
         df_sliced = df.copy()
         df_excluded = pd.DataFrame()
-        with open(os.getcwd() +'/api/training/ml_models/model_params/dict_bh_info.json', 'r') as fp:
+        with open(os.getcwd() + self.model_params_path+'/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
         for time_str in dict_bh_info[site]['corrupt_data_ind']:
@@ -377,7 +384,7 @@ class CodRegressorUsingBh(ModelTemplate):
 
         """
         scaling_df = self._load_obj('scaling_df')
-        with open(os.getcwd() +'/api/training/ml_models/model_params/dict_bh_info.json', 'r') as fp:
+        with open(os.getcwd() + self.model_params_path+'/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
         if site == 'atarot':
@@ -436,4 +443,3 @@ def get_start_and_end_time():
     end = datetime.combine(date.today(), time.min)
     start = end - timedelta(weeks=16)
     return start.timestamp(), end.timestamp()
-
