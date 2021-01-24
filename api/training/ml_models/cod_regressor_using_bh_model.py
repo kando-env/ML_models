@@ -12,7 +12,7 @@ sys.path.insert(0, '..')
 from model_template import ModelTemplate
 from scipy import interpolate
 import os
-
+from pathlib import Path
 
 class CodRegressorUsingBh(ModelTemplate):
     def __init__(self):
@@ -54,6 +54,7 @@ class CodRegressorUsingBh(ModelTemplate):
         site should currently be one of the options in sites_list
         :return: json with prediction outputs
         """
+
         self.model_params_path = '/training/ml_models/model_params'
         df = self._get_site_df(kwargs['site'], test_start=kwargs['start'], test_end=kwargs['end'])
         df, base_features = self._extract_rolling_features(df)
@@ -112,6 +113,9 @@ class CodRegressorUsingBh(ModelTemplate):
         """
         saves and obj to model_params folder
         """
+        p = Path(name + '.pkl').resolve()
+        print("full path to be saved:" +str(p))
+
         with open(os.getcwd() + self.model_params_path + '/' + name + '.pkl', 'wb') as f:
             pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
@@ -119,6 +123,8 @@ class CodRegressorUsingBh(ModelTemplate):
         """
         loads an obj to model_params folder
         """
+        p = Path(name + '.pkl').resolve()
+        print("full path to be loaded:" +str(p))
         with open(os.getcwd() + self.model_params_path + '/' + name + '.pkl', 'rb') as f:
             return pickle.load(f)
 
@@ -223,6 +229,10 @@ class CodRegressorUsingBh(ModelTemplate):
         """
         gets bh, cod and wl metadata and extracts basic features to be used for training or validation
         """
+        print("Path at terminal when executing this file")
+        print(os.getcwd() + "\n")
+        p = Path('dict_bh_info.json').resolve()
+        print("full path to be loaded:" +str(p))
         with open(os.getcwd() + self.model_params_path + '/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
@@ -349,6 +359,9 @@ class CodRegressorUsingBh(ModelTemplate):
         """
         df_sliced = df.copy()
         df_excluded = pd.DataFrame()
+        p = Path('dict_bh_info.json').resolve()
+        print("full path to be loaded:" +str(p))
+
         with open(os.getcwd() + self.model_params_path+'/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
