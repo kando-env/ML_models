@@ -237,7 +237,7 @@ class CodRegressorUsingBh(ModelTemplate):
         print(os.getcwd() + "\n")
         p = Path('dict_bh_info.json').resolve()
         print("full path to be loaded:" +str(p))
-        with open('/code/ml_models/model_params/dict_bh_info.json', 'r') as fp:
+        with open(os.getcwd() + self.model_params_path + '/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
         if test_start is None:
