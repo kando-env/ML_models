@@ -258,12 +258,12 @@ class CodRegressorUsingBh(ModelTemplate):
         with open(self.model_params_path + '/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
-        if not training_flag:
-            # this means we are predicting
+        if training_flag:
+            # this means we are TRAINING
             start = dict_bh_info[site]['start']
             end = dict_bh_info[site]['end']
         else:
-            # this means we are training
+            # this means we are PREDICTING
             start = test_start
             end = test_end
 
