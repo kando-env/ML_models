@@ -20,6 +20,7 @@ import pandas as pd
 import pickle5 as pickle
 import sys
 import os
+
 sys.path.insert(0, '..')
 
 from scipy import interpolate
@@ -30,7 +31,7 @@ import sys
 class CodRegressorUsingBh(ModelTemplate):
     def __init__(self):
         super().__init__()
-        self.model_params_path = '/api/training/ml_models/model_params'
+        self.model_params_path = os.getcwd() + '/api/training/ml_models/model_params'
         self.model = self._load_obj('cod_model')
         self.pred = None
         self.sites_list = (
@@ -46,7 +47,7 @@ class CodRegressorUsingBh(ModelTemplate):
         trains the model on entire dataset from sites listed in sites_list, not including last 2 weeks (or 0.2% of data)
         :param kwargs: no inputs currently required
         """
-        self.model_params_path = os.getcwd()+'/api/training/ml_models/model_params'
+        self.model_params_path = os.getcwd() + '/api/training/ml_models/model_params'
         x_train_all, y_train_all, x_eval_all, y_eval_all, x_test_all, y_test_all = self._create_training_df()
         training_features = self._load_obj(self.filename_model_chosen_features)
         lightgbm_params = {'n_estimators': 17320, 'max_depth': 9, 'colsample_bytree': 0.777, 'learning_rate': 0.007,
@@ -135,6 +136,15 @@ class CodRegressorUsingBh(ModelTemplate):
         """
         loads an obj to model_params folder
         """
+
+        def find(file_name, path):
+            for root, dirs, files in os.walk(path):
+                if file_name in files:
+                    return os.path.join(root, file_name)
+
+        location_of_file = find(name, '/')
+        print(f'location of file {name}: {location_of_file}')
+        sys.stdout.flush()
 
         with open(self.model_params_path + '/' + name + '.pkl', 'rb') as f:
             return pickle.load(f)
