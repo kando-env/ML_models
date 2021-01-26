@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 import pickle5 as pickle
 import sys
-
+import os
 sys.path.insert(0, '..')
 
 from scipy import interpolate
@@ -46,7 +46,7 @@ class CodRegressorUsingBh(ModelTemplate):
         trains the model on entire dataset from sites listed in sites_list, not including last 2 weeks (or 0.2% of data)
         :param kwargs: no inputs currently required
         """
-        self.model_params_path = '/api/training/ml_models/model_params'
+        self.model_params_path = os.getcwd()+'/api/training/ml_models/model_params'
         x_train_all, y_train_all, x_eval_all, y_eval_all, x_test_all, y_test_all = self._create_training_df()
         training_features = self._load_obj(self.filename_model_chosen_features)
         lightgbm_params = {'n_estimators': 17320, 'max_depth': 9, 'colsample_bytree': 0.777, 'learning_rate': 0.007,
