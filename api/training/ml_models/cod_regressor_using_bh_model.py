@@ -1,7 +1,18 @@
 import json
 import time
 from datetime import date, datetime, time, timedelta, timezone
-# from kando_data.model_runner.cloud import CloudEnv
+
+'''
+remove when pushing to remote rep
+
+from kando_data.model_runner.cloud import CloudEnv
+from kando_data.model_runner.local import ModelTemplate
+'''
+
+'''
+add when pushing to remote rep
+'''
+from model_template import ModelTemplate
 
 import lightgbm as lgb
 import numpy as np
@@ -10,12 +21,10 @@ import pickle5 as pickle
 import sys
 
 sys.path.insert(0, '..')
-# from kando_data.model_runner.local import ModelTemplate
-from model_template import ModelTemplate
+
 from scipy import interpolate
-import os
-from pathlib import Path
 from dotenv import load_dotenv
+import sys
 
 
 class CodRegressorUsingBh(ModelTemplate):
@@ -59,8 +68,10 @@ class CodRegressorUsingBh(ModelTemplate):
         :return: json with prediction outputs
         """
 
-        self.model_params_path = '/training/ml_models/model_params'
-        df = self._get_site_df(kwargs['site'], test_start=kwargs['start'], test_end=kwargs['end'])
+        print(f'entering do_predict')
+        sys.stdout.flush()
+        self.model_params_path = '/code/training/ml_models/model_params'
+        df = self._get_site_df(kwargs['site'], training_flag=False, test_start=kwargs['start'], test_end=kwargs['end'])
         df, base_features = self._extract_rolling_features(df)
         if self.target in df:
             x_test = df.drop(columns=[self.target], axis=1)
@@ -74,8 +85,8 @@ class CodRegressorUsingBh(ModelTemplate):
         prediction = pd.DataFrame({self.target: prediction}, index=x_test.index)
         return prediction.to_json()
 
-    # @staticmethod
-    def _extract_rolling_features(self, df):
+    @staticmethod
+    def _extract_rolling_features(df):
         """
         extracts rolling features such as mean and std from a certain time window
         :param df: dataframe containing target and basic features (base_features) such as 'BH'
@@ -113,23 +124,19 @@ class CodRegressorUsingBh(ModelTemplate):
                     window=window_size, min_periods=1).min()
         return df, base_features
 
-    def _save_obj(self,obj, name):
+    def _save_obj(self, obj, name):
         """
         saves and obj to model_params folder
         """
-        p = Path(name + '.pkl').resolve()
-        print("full path to be saved:" +str(p))
-
-        with open(os.getcwd() + self.model_params_path + '/' + name + '.pkl', 'wb') as f:
+        with open(self.model_params_path + '/' + name + '.pkl', 'wb') as f:
             pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
-    def _load_obj(self,name):
+    def _load_obj(self, name):
         """
         loads an obj to model_params folder
         """
-        p = Path(name + '.pkl').resolve()
-        print("full path to be loaded:" +str(p))
-        with open(os.getcwd() + self.model_params_path + '/' + name + '.pkl', 'rb') as f:
+
+        with open(self.model_params_path + '/' + name + '.pkl', 'rb') as f:
             return pickle.load(f)
 
     def _create_training_df(self):
@@ -146,7 +153,7 @@ class CodRegressorUsingBh(ModelTemplate):
         y_test_all = pd.Series(dtype=float, name=self.target)
 
         for site in self.sites_list:
-            df = self._get_site_df(site=site)
+            df = self._get_site_df(site=site, training_flag=True)
 
             # choose a method out of ['diff','peak_detection','rolling_std']
             # dict where key is you path and value is dataframe
@@ -229,18 +236,18 @@ class CodRegressorUsingBh(ModelTemplate):
     def get_meta_data(self):
         pass
 
-    def _get_site_df(self, site, test_start=None, test_end=None):
+    def _get_site_df(self, site, training_flag, test_start=None, test_end=None):
         """
         gets bh, cod and wl metadata and extracts basic features to be used for training or validation
         """
-        print("Path at terminal when executing this file")
-        print(os.getcwd() + "\n")
-        p = Path('dict_bh_info.json').resolve()
-        print("full path to be loaded:" +str(p))
-        with open(os.getcwd() + self.model_params_path + '/dict_bh_info.json', 'r') as fp:
+        print('entering -get_site_df')
+        print(f'creating df for site {site}')
+        sys.stdout.flush()
+
+        with open(self.model_params_path + '/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
-        if test_start is None:
+        if not training_flag:
             # this means we are predicting
             start = dict_bh_info[site]['start']
             end = dict_bh_info[site]['end']
@@ -249,9 +256,6 @@ class CodRegressorUsingBh(ModelTemplate):
             start = test_start
             end = test_end
 
-
-
-        print(f'creating df for site {site}')
         bh_data = self.client.get_all(point_id=dict_bh_info[site]['bh_pointid'], unit_id='', start=start, end=end,
                                       raw_data='True')
         df_bh = pd.DataFrame(bh_data['samplings']).T
@@ -357,16 +361,14 @@ class CodRegressorUsingBh(ModelTemplate):
         df = df.resample('15T').nearest()
         return df
 
-    def _remove_corrupt_data(self,df, site):
+    def _remove_corrupt_data(self, df, site):
         """
         removes corrupted data as specified in dict_bh_info per each site
         """
         df_sliced = df.copy()
         df_excluded = pd.DataFrame()
-        p = Path('dict_bh_info.json').resolve()
-        print("full path to be loaded:" +str(p))
 
-        with open(os.getcwd() + self.model_params_path+'/dict_bh_info.json', 'r') as fp:
+        with open(self.model_params_path + '/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
         for time_str in dict_bh_info[site]['corrupt_data_ind']:
@@ -401,7 +403,7 @@ class CodRegressorUsingBh(ModelTemplate):
 
         """
         scaling_df = self._load_obj('scaling_df')
-        with open(os.getcwd() + self.model_params_path+'/dict_bh_info.json', 'r') as fp:
+        with open(self.model_params_path + '/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
 
         if site == 'atarot':
@@ -461,6 +463,7 @@ def get_start_and_end_time():
     start = end - timedelta(weeks=16)
     return start.timestamp(), end.timestamp()
 
+
 def main():
     # dotenv_path = join(dirname(__file__), '.env')
     load_dotenv()
@@ -468,7 +471,7 @@ def main():
     #
     MODEL_NAME = "cod_regressor_using_bh"
     #
-    # c_env.train_model(MODEL_NAME, params={}, machine_type="c5.4xlarge")
+    c_env.train_model(MODEL_NAME, params={}, machine_type="c5.4xlarge")
     #
     # c_env.deploy_model("mosra3h0k3knhd9")
 
@@ -478,6 +481,7 @@ def main():
     y_pred = c_env.request_prediction(deployment_id='debuo03nv2z3zz',
                                       context={"model": MODEL_NAME, "site": site, "start": start, "end": end})
     print(y_pred)
+
 
 if __name__ == "__main__":
     main()
