@@ -28,7 +28,7 @@ from dotenv import load_dotenv
 import sys
 
 
-class CodRegressorUsingBh(ModelTemplate):
+class CodRegressorUsingBhTemplate(ModelTemplate):
     def __init__(self):
         super().__init__()
         self.model_params_path = '/code/api/training/ml_models/model_params'
