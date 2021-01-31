@@ -1,40 +1,38 @@
 import json
+import sys
 import time
 from datetime import date, datetime, time, timedelta, timezone
-
-'''
-remove when pushing to remote rep
-
-from kando_data.kando_data.model_runner.local import ModelTemplate
-from kando_data.model_runner.cloud import CloudEnv
-'''
-
-'''
-add when pushing to remote rep
-'''
-from model_template import ModelTemplate
 
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
 import pickle5 as pickle
-import sys
-import os
-
-sys.path.insert(0, '..')
-
-from scipy import interpolate
 from dotenv import load_dotenv
-import sys
+from scipy import interpolate
+
+sys.path.append("..")
+'''
+
+
+'''
+if __name__ == "__main__":
+    # remove when pushing to remote rep
+    from kando_data.kando_data.model_runner.local import ModelTemplate
+else:
+    from model_template import ModelTemplate
+
 
 
 class CodRegressorUsingBhTemplate(ModelTemplate):
     def __init__(self):
         super().__init__()
-        self.model_params_path = '/code/api/training/ml_models/model_params'
+        if __name__ == '__main__':
+            self.model_params_path = 'code/api/training/ml_models/model_params'
+        else:
+            self.model_params_path = '/code/api/training/ml_models/model_params'
         self.model = self._load_obj('cod_model')
         self.pred = None
-        self.sites_list = (
+        self.sites_trained_list = (
             'sorek', 'sorek_new', 'beitGalla_dom', 'beitGalla', 'refaim_oil', 'refaim_150', 'begin', 'atarot',
             'vetrinari')
 
@@ -47,7 +45,10 @@ class CodRegressorUsingBhTemplate(ModelTemplate):
         trains the model on entire dataset from sites listed in sites_list, not including last 2 weeks (or 0.2% of data)
         :param kwargs: no inputs currently required
         """
-        self.model_params_path = '/code/api/training/ml_models/model_params'
+        if __name__ == "__main__":
+            self.model_params_path = 'code/api/training/ml_models/model_params'
+        else:
+            self.model_params_path = '/code/api/training/ml_models/model_params'
         x_train_all, y_train_all, x_eval_all, y_eval_all, x_test_all, y_test_all = self._create_training_df()
         training_features = self._load_obj(self.filename_model_chosen_features)
         lightgbm_params = {'n_estimators': 17320, 'max_depth': 9, 'colsample_bytree': 0.777, 'learning_rate': 0.007,
@@ -138,15 +139,6 @@ class CodRegressorUsingBhTemplate(ModelTemplate):
         loads an obj to model_params folder
         """
 
-        def find(file_name, path):
-            for root, dirs, files in os.walk(path):
-                if file_name in files:
-                    return os.path.join(root, file_name)
-
-        location_of_file = find(name, '/')
-        print(f'location of file {name}: {location_of_file}')
-        sys.stdout.flush()
-
         with open(self.model_params_path + '/' + name + '.pkl', 'rb') as f:
             return pickle.load(f)
 
@@ -163,7 +155,7 @@ class CodRegressorUsingBhTemplate(ModelTemplate):
         y_eval_all = pd.Series(dtype=float, name=self.target)
         y_test_all = pd.Series(dtype=float, name=self.target)
 
-        for site in self.sites_list:
+        for site in self.sites_trained_list:
             df = self._get_site_df(site=site, training_flag=True)
 
             # choose a method out of ['diff','peak_detection','rolling_std']
@@ -193,20 +185,21 @@ class CodRegressorUsingBhTemplate(ModelTemplate):
         train_df = x_train.copy()
         train_df[self.target] = y_train
         train_df.dropna(subset=[self.target], inplace=True)
+        y_train = train_df.loc[:, self.target]
         X_train = train_df.drop([self.target], axis=1)
-        y_train = train_df[self.target]
 
         eval_df = x_eval.copy()
         eval_df[self.target] = y_eval
         eval_df.dropna(subset=[self.target], inplace=True)
+        y_eval = eval_df.loc[:, self.target]
         X_eval = eval_df.drop([self.target], axis=1)
-        y_eval = eval_df[self.target]
 
         test_df = x_test.copy()
         test_df[self.target] = y_test
         test_df.dropna(subset=[self.target], inplace=True)
+        y_test = test_df.loc[:, self.target]
+
         X_test = test_df.drop([self.target], axis=1)
-        y_test = test_df[self.target]
 
         print(f'X_train shape: {X_train.shape},X_eval: {X_eval.shape},X_test: {X_test.shape}')
         print(f'y_train shape: {y_train.shape},y_eval: {y_eval.shape},y_test: {y_test.shape}')
@@ -416,10 +409,14 @@ class CodRegressorUsingBhTemplate(ModelTemplate):
         scaling_df = self._load_obj('scaling_df')
         with open(self.model_params_path + '/dict_bh_info.json', 'r') as fp:
             dict_bh_info = json.load(fp)
-
+        # taking into account height changes
         if site == 'atarot':
             height = df.DateTime.apply(lambda curr_time: 150
             if pd.to_datetime('2021-01-05 15:00:00').timestamp() <= curr_time else dict_bh_info[site]['height'])
+            dis_from_sensor = height - df['WL']
+        elif site == 'begin':
+            height = df.DateTime.apply(lambda curr_time: 350
+            if pd.to_datetime('2021-12-21 11:20:00').timestamp() <= curr_time else dict_bh_info[site]['height'])
             dis_from_sensor = height - df['WL']
         else:
             dis_from_sensor = (dict_bh_info[site]['height'] - df['WL'])
